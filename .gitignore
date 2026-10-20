@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Obsidian / editor
+.obsidian/
+.trash/
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Secrets
+.env
+.env.*
+
+# Local raw data; keep copyrighted source lists out of public commits by default
+data/raw/
+
+# Archives
+*.zip
