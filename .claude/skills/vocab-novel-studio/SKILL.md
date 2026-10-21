@@ -1,20 +1,21 @@
 ---
 name: vocab-novel-studio
-description: Build, serialize, and audit long-form vocabulary-learning novels from a user-supplied word list. Use this skill whenever the user wants to scan vocabulary data, design a novel framework for word coverage, write the next chapter of a vocabulary novel, or audit whether target words truly appear in story text. 当用户提到“扫描单词做小说”“词汇小说”“背单词小说”“建立小说总纲”“写下一章”“词汇覆盖审计”等任务时，主动使用本 skill。
-version: 1.0.0
+description: Build, serialize, and audit vocabulary-learning novels or customized short stories from a user-supplied word list or theme. Use this skill whenever the user wants to scan vocabulary data, design a novel framework for word coverage, write the next chapter, generate a personalized short story after a short preference interview, or audit whether target words truly appear in story text. 当用户提到“扫描单词做小说”“词汇小说”“背单词小说”“建立小说总纲”“写下一章”“定制小故事”“短篇词汇故事”“词汇覆盖审计”等任务时，主动使用本 skill。
+version: 1.1.0
 ---
 
 # Vocab Novel Studio · 词汇小说工坊
 
 ## Purpose
 
-Turn a user's vocabulary list into a long-form novel that is readable as fiction first, while maintaining a traceable mapping from every target word to real story contexts.
+Turn a user's vocabulary list into a readable long-form novel or a customized short story, while maintaining a traceable mapping from every target word to real story contexts.
 
-The workflow has three modes:
+The workflow has four modes:
 
 1. **Bootstrap** — scan the word data, audit it, design the novel, allocate all words to chapters.
 2. **Continue** — read the project state and write exactly one chapter.
 3. **Audit** — verify actual word coverage in existing prose and report problems.
+4. **Custom story** — ask a few preference questions, then write a self-contained vocabulary short story.
 
 The guiding rule:
 
@@ -38,9 +39,13 @@ Prefer this layout unless the user's project already has another one:
         ├── 00_novel_bible.md
         ├── 01_vocabulary_ledger.md
         ├── 02_progress_ledger.md
-        └── chapters/
-            └── 第NN章_标题.md
+        ├── chapters/
+        │   └── 第NN章_标题.md
+        └── stories/
+            └── 日期_故事标题.md
 ```
+
+`stories/` is optional: use it for one-off or mini-series short stories that do not need a full chapter ledger.
 
 Use the actual paths if the user has an established project. Never overwrite an existing project just to match this template.
 
@@ -224,6 +229,80 @@ For every target word, classify:
 
 Report scope, chapter/file evidence, actual forms, problems, repair suggestions, counts and whether the audit is full or partial. Never inflate coverage.
 
+### Mode D · Custom short story or mini-series
+
+Use when the user wants a personalized short story instead of a full serialized novel chapter. This mode may be used without the three project ledgers.
+
+#### D1. Ask only a few questions
+
+Ask at most **one short round** of 3–5 high-value questions, and never ask for information the user already provided. If an AskUserQuestion-style tool is available, use it; otherwise ask in plain text.
+
+Core questions:
+
+1. **Target words**: use a list the user supplies, choose from a theme/level, or draw from an existing project ledger? How many?
+2. **Genre and mood**: e.g. cozy fantasy, romance, mystery, school, sci-fi, dark fairy tale, healing slice-of-life. Offer 4–6 examples and allow free input.
+3. **Length and language**: flash (~800–1,200 Chinese characters), short (~1,500–2,500), or longer (~3,000+); target-word count (8–25); Chinese narration + English target sentences, bilingual, or English-only.
+4. **Protagonist and relationship**: original character or user avatar? Desired name, gender, POV, relationships, romance level (none / light / central), and one thing they want to avoid.
+
+Optional:
+5. A premise or image the user wants to see; content boundaries; whether to save as a note or reply in chat.
+
+If the user says “随便 / 惊喜 / 你决定”, stop interviewing and choose a coherent default set. Do not interrogate them.
+
+Default when nothing is specified:
+
+- Chinese narrative with English target words;
+- gentle fantasy or contemporary magical realism;
+- 1,500–2,500 Chinese characters;
+- 12–18 target words;
+- original protagonist, third-person limited;
+- no explicit content; light emotional warmth;
+- save to `stories/YYYY-MM-DD_slug.md` if a project exists, otherwise reply in chat.
+
+#### D2. Mirror a tiny custom card
+
+Before writing, show one compact card:
+
+```text
+目标词来源 / 数量：
+类型 / 氛围：
+长度 / 语言：
+主角 / 视角：
+关系 / 恋爱浓度：
+避开的内容：
+输出方式：
+```
+
+If the user already gave all details, skip the card or show it in one line and proceed.
+
+#### D3. Write a complete short story
+
+- Give it a real arc: want → obstacle → choice → consequence → changed state.
+- Include one vivid relationship or emotional turn; not just a word-bearing vignette.
+- Put target words into natural English sentences in narration and dialogue. Do not dump them.
+- Use each requested target word at least once in the main story; if a word truly cannot fit, say so honestly rather than faking coverage.
+- If the story contains an inset reading/exam/quote, words inside it do not count as the main instance; also use them in the main plot.
+- Mark first target occurrences in bold; do not over-gloss inside the story.
+- Avoid copying recognizable copyrighted characters or plots. A fandom-style mood is fine; the characters and events must be original unless the user owns the material and explicitly asks for fan fiction for private use.
+
+#### D4. End with a light learning layer
+
+Unless the user asks for story-only output, include:
+
+- a compact target-word table (word, actual form, core meaning, story context);
+- 2–4 active-recall questions, with answers after a separator;
+- coverage note: how many requested words appeared in the main story, and any unused words.
+
+Do not pretend a short story covers a whole word list. State the actual target set.
+
+#### D5. Mini-series continuity
+
+Only if the user wants recurring stories:
+
+- save `stories/` files and a small `short_story_ledger.md` with characters, relationship state, recurring imagery, target words, and unresolved threads;
+- read that ledger before the next story;
+- do not invent facts that contradict previous stories.
+
 ## Non-negotiable quality rules
 
 1. Target words must be accurate. A similar Chinese gloss does not prove two English words are interchangeable.
@@ -261,6 +340,14 @@ For a newly written chapter:
 - what state the next chapter starts from;
 - ask whether to continue.
 
+For a custom short story:
+
+- title and a one-sentence premise;
+- target-word count actually used;
+- where it was saved (if anywhere);
+- any requested target words that were not used;
+- offer a continuation or a new story with the same cast.
+
 Do not paste the whole chapter into chat unless asked; the chapter file is the deliverable.
 
 ## Quick prompts
@@ -271,5 +358,7 @@ The user can say:
 - “继续词汇小说，写下一章。”
 - “审计第 N 章的词汇覆盖。”
 - “把模拟阅读里的目标词也补进主线剧情。”
+- “给我写一个定制小故事，先问我几个问题。”
+- “随便来一个温柔的词汇短篇，12 个目标词。”
 
 If invoked without explicit paths, find the project ledgers first; if multiple projects exist, ask which one.

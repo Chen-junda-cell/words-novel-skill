@@ -165,6 +165,10 @@ def main() -> int:
         assert diag["nonempty_unique_words"] == 2, diag
         assert csv_path.exists(), diag
 
+        skill_dir = ROOT / ".claude" / "skills" / "vocab-novel-studio"
+        assert (skill_dir / "prompts" / "04-custom-short-story.md").exists()
+        assert (skill_dir / "templates" / "short_story_template.md").exists()
+
         print("SMOKE TEST PASSED")
         print(json.dumps({"next": next_data["title"], "audit": fixed_data["primary_coverage"], "extracted": 2}, ensure_ascii=False))
     return 0

@@ -1,6 +1,6 @@
 # Vocab Novel Studio · 词汇小说工坊
 
-把一份单词表变成一部能长期连载的轻小说，并持续追踪每个目标词到底有没有真正进入故事。
+把一份单词表变成一部能长期连载的轻小说，或先经过几轮问答，生成一篇专属于你的词汇短篇故事；同时持续追踪目标词到底有没有真正进入故事。
 
 这是一个面向 **Claude Code / 兼容 Agent Skills 的客户端** 的项目级 skill。它组合了：
 
@@ -9,7 +9,8 @@
 - 单章创作引擎；
 - 逐词覆盖审计；
 - 连续性与记忆进度台账；
-- “模拟阅读不能单独算覆盖”的硬规则。
+- “模拟阅读不能单独算覆盖”的硬规则；
+- 先询问偏好、再生成定制小故事的互动模式。
 
 > 仓库只提供工作流、脚本和模板。**不包含任何用户的小说正文、角色设定或受版权保护的原始词表。**
 
@@ -53,7 +54,15 @@ AI 写词汇小说时很容易出现三种失败：
 - 对每个目标词报告：已覆盖 / 已出现但需改进 / 未覆盖 / 待核验；
 - 不虚报覆盖率。
 
-### 4. 用户附加硬规则
+### 4. Custom Story：问答后生成定制短篇
+
+- Agent 先问 3–5 个关键问题：目标词、类型氛围、长度、主角关系、内容边界；
+- 如果用户说“随便”，使用默认组合，不再盘问；
+- 支持一次性短篇，也支持同一组人物的迷你连载；
+- 输出完整故事弧线，而不是词汇展示片段；
+- 目标词进入自然英文句子，篇末附轻量词汇回声与可选主动回忆。
+
+### 5. 用户附加硬规则
 
 > 模拟阅读、试卷、信件、碑文或引文中的目标词，必须在同一章主线动作、对话或后果中再出现一次，才能算主覆盖。
 
@@ -115,7 +124,33 @@ git push -u origin main
 
 ---
 
-## 快速开始
+## 只想写一篇定制小故事？
+
+不需要先建立长篇项目。直接对 Agent 说：
+
+```text
+用 vocab-novel-studio 给我写一个定制小故事。
+先问我几个问题，再开始写。
+```
+
+例如它可能会问：
+
+- 目标词用你提供的词表，还是围绕某个主题选？
+- 想要温柔奇幻、悬疑、校园、科幻，还是别的氛围？
+- 想要 800–1,200 字、1,500–2,500 字，还是更长？
+- 主角是谁，视角和恋爱浓度如何，有什么不想看的内容？
+
+如果你只想省事，也可以说：
+
+```text
+随便来一个温柔的短篇，12 个目标词，不要问我太多。
+```
+
+详细问答与生成规范见 `.claude/skills/vocab-novel-studio/prompts/04-custom-short-story.md`。
+
+---
+
+## 快速开始：建立长篇项目
 
 ### 1. 创建小说项目目录
 
@@ -207,12 +242,14 @@ vocab-novel-studio/
 │           ├── prompts/
 │           │   ├── 01-framework-bootstrap.md
 │           │   ├── 02-write-chapter.md
-│           │   └── 03-audit-coverage.md
+│           │   ├── 03-audit-coverage.md
+│           │   └── 04-custom-short-story.md
 │           └── templates/
 │               ├── 00_novel_bible.md
 │               ├── 01_vocabulary_ledger.md
 │               ├── 02_progress_ledger.md
 │               ├── chapter_template.md
+│               ├── short_story_template.md
 │               └── project_CLAUDE.md
 ├── tests/
 │   └── smoke_test.py
@@ -236,7 +273,7 @@ vocab-novel-studio/
 - **不编造词源、搭配和覆盖率。**
 - **人物要有独立目标；恋爱是关系的一种结果，不是奖励。**
 
-详细的操作规范与触发条件在 `.claude/skills/vocab-novel-studio/SKILL.md`。三个独立 prompt 在同目录的 `prompts/`，可用于不支持 skills 的其他 Agent。
+详细的操作规范与触发条件在 `.claude/skills/vocab-novel-studio/SKILL.md`。四个独立 prompt 在同目录的 `prompts/`，可用于不支持 skills 的其他 Agent。
 
 ---
 
@@ -283,4 +320,4 @@ MIT. See [LICENSE](LICENSE).
 
 ## English summary
 
-Vocab Novel Studio is a reusable agent skill workflow for turning a user-supplied vocabulary list into a long-form novel with traceable word coverage. It includes data extraction, framework templates, a chapter engine, a continuity/progress ledger, and a strict coverage auditor. Target words that appear only in inset texts (mock readings, exam passages, quotes) must also appear in the main plot to count. The repository intentionally ships without any copyrighted word list or novel text.
+Vocab Novel Studio is a reusable agent skill workflow for turning a user-supplied vocabulary list into a long-form novel or a customized short story with traceable word coverage. It includes data extraction, framework templates, an interview-first short-story mode, a chapter engine, a continuity/progress ledger, and a strict coverage auditor. Target words that appear only in inset texts (mock readings, exam passages, quotes) must also appear in the main plot to count. The repository intentionally ships without any copyrighted word list or novel text.
