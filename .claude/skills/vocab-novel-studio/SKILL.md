@@ -1,7 +1,7 @@
 ---
 name: vocab-novel-studio
 description: Build, serialize, and audit vocabulary-learning novels or customized short stories from a user-supplied word list or theme. Use this skill whenever the user wants to scan vocabulary data, design a novel framework for word coverage, write the next chapter, generate a personalized short story after a short preference interview, or audit whether target words truly appear in story text. 当用户提到“扫描单词做小说”“词汇小说”“背单词小说”“建立小说总纲”“写下一章”“定制小故事”“短篇词汇故事”“词汇覆盖审计”等任务时，主动使用本 skill。
-version: 1.1.0
+version: 1.1.1
 ---
 
 # Vocab Novel Studio · 词汇小说工坊
@@ -25,6 +25,17 @@ The guiding rule:
 ## Standard project layout
 
 Bundled templates and prompts live next to this `SKILL.md`, under `templates/` and `prompts/`.
+
+### Resolve `<skill-dir>` first
+
+Commands in this document use `<skill-dir>` for the directory containing this `SKILL.md`, because different agent hosts install skills in different places:
+
+- **Claude Code / Claudian:** `.claude/skills/vocab-novel-studio/`
+- **DeepSeek Harness (DSH), project:** `.dsh/skills/vocab-novel-studio/`
+- **DSH, user-level:** `~/.dsh/skills/vocab-novel-studio/`
+- Other hosts: use the actual installed path.
+
+Do not assume the scripts are always under `.claude/skills/...`.
 
 Prefer this layout unless the user's project already has another one:
 
@@ -69,7 +80,7 @@ Use when there is no framework yet, or the user provides a raw word list.
 Helper:
 
 ```bash
-python .claude/skills/vocab-novel-studio/scripts/extract_words.py <raw-word-list> --out <project>/raw_words.csv
+python "<skill-dir>/scripts/extract_words.py" <raw-word-list> --out <project>/raw_words.csv
 ```
 
 The script is a parser and diagnostic tool, not a full semantic authority. Repair malformed rows explicitly.
@@ -135,7 +146,7 @@ Use when a project already has a bible, a vocabulary ledger and a progress ledge
 Run:
 
 ```bash
-python .claude/skills/vocab-novel-studio/scripts/novel.py next --novel-dir <project>
+python "<skill-dir>/scripts/novel.py" next --novel-dir <project>
 ```
 
 Then read:
@@ -197,7 +208,7 @@ Use `templates/chapter_template.md`. Minimum sections:
 Run:
 
 ```bash
-python .claude/skills/vocab-novel-studio/scripts/novel.py audit --novel-dir <project> "<chapter file>"
+python "<skill-dir>/scripts/novel.py" audit --novel-dir <project> "<chapter file>"
 ```
 
 The script is a first-pass word-form check. Still verify every target word manually for:
@@ -362,3 +373,14 @@ The user can say:
 - “随便来一个温柔的词汇短篇，12 个目标词。”
 
 If invoked without explicit paths, find the project ledgers first; if multiple projects exist, ask which one.
+
+## Host compatibility
+
+The content is host-agnostic, but automatic discovery is not. Verify the installed skill path before running commands:
+
+- Claude Code / Claudian: `.claude/skills/vocab-novel-studio/`
+- DeepSeek Harness: `.dsh/skills/vocab-novel-studio/` (project) or `~/.dsh/skills/vocab-novel-studio/` (user)
+- Claude Code bridge for DSH: third-party `dsh-skills-bridge`; not required
+- Chat-only hosts: paste/read this file and the relevant prompt; full script-based auditing is unavailable without filesystem and terminal tools
+
+When a host installs the skill in a different directory, resolve the actual skill directory and substitute it for `<skill-dir>`.

@@ -2,7 +2,7 @@
 
 把一份单词表变成一部能长期连载的轻小说，或先经过几轮问答，生成一篇专属于你的词汇短篇故事；同时持续追踪目标词到底有没有真正进入故事。
 
-这是一个面向 **Claude Code / 兼容 Agent Skills 的客户端** 的项目级 skill。它组合了：
+这是一个面向 **Claude Code、DeepSeek Harness（DSH）以及兼容 Agent Skills 的客户端** 的项目级 skill。它组合了：
 
 - 词表扫描与数据质量检查；
 - 小说世界观、人物、章节和词汇分配总纲；
@@ -105,6 +105,28 @@ cd vocab-novel-studio
 
 模板与 prompts 已经打包在这个 skill 目录内，不需要另外复制。再把其中 `templates/project_CLAUDE.md` 复制为项目记忆 `CLAUDE.md`，按你的小说名修改。
 
+### 方式 C：DeepSeek Harness（DSH）
+
+DSH 原生支持 `SKILL.md`，但它扫描的是 `.dsh/skills/`，不是 `.claude/skills/`。推荐在项目根目录安装：
+
+```powershell
+New-Item -ItemType Directory -Force -Path .dsh\skills
+Copy-Item -Recurse -Force .claude\skills\vocab-novel-studio .dsh\skills\
+```
+
+也可以安装到用户级：
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.dsh\skills"
+Copy-Item -Recurse -Force .claude\skills\vocab-novel-studio "$env:USERPROFILE\.dsh\skills\"
+```
+
+然后在 DSH 中直接说“用 vocab-novel-studio 给我写一个定制小故事，先问我几个问题”，或尝试 `/vocab-novel-studio`。
+
+> DSH 是开发者预览版，技能目录与加载行为以你安装的版本为准；它需要文件系统和终端工具才能运行 Python 审计脚本。
+
+> 如果使用第三方 `dsh-skills-bridge`，也可以把 Claude Code 技能目录桥接进 DSH。桥接插件不是本仓库依赖。
+
 ### 发布到 GitHub
 
 在 GitHub 创建一个空仓库（不要初始化 README），然后在本目录执行：
@@ -119,7 +141,8 @@ git push -u origin main
 ### 要求
 
 - Python 3.11+（脚本只使用标准库）
-- 支持 Agent Skills 的 Claude Code / Claudian 环境
+- 支持 Agent Skills 的 Claude Code / Claudian 或 DeepSeek Harness
+- 完整流程需要文件读写与终端执行能力；纯聊天界面只能使用定制短篇的提示流程
 - Obsidian 可选，但适合作为长期写作与阅读界面
 
 ---
@@ -274,6 +297,8 @@ vocab-novel-studio/
 - **人物要有独立目标；恋爱是关系的一种结果，不是奖励。**
 
 详细的操作规范与触发条件在 `.claude/skills/vocab-novel-studio/SKILL.md`。四个独立 prompt 在同目录的 `prompts/`，可用于不支持 skills 的其他 Agent。
+
+脚本命令在 skill 文件里使用 `<skill-dir>` 占位符：Claude Code 下是 `.claude/skills/vocab-novel-studio`，DSH 项目级安装下是 `.dsh/skills/vocab-novel-studio`。
 
 ---
 
