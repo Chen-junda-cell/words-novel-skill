@@ -123,6 +123,8 @@ Copy-Item -Recurse -Force .claude\skills\vocab-novel-studio "$env:USERPROFILE\.d
 
 然后在 DSH 中直接说“用 vocab-novel-studio 给我写一个定制小故事，先问我几个问题”，或尝试 `/vocab-novel-studio`。
 
+> 如果 DSH 读取到了当前主 Vault 里的其他项目，它可能会把这些项目当成用户上下文。测试“其他用户”的体验时，请在只包含 `vocab-novel-studio` 仓库的干净目录中启动 DSH；或明确发送 `prompts/00-start-here.md` 里的冷启动指令。
+
 > DSH 是开发者预览版，技能目录与加载行为以你安装的版本为准；它需要文件系统和终端工具才能运行 Python 审计脚本。
 
 > 如果使用第三方 `dsh-skills-bridge`，也可以把 Claude Code 技能目录桥接进 DSH。桥接插件不是本仓库依赖。
@@ -155,6 +157,20 @@ git push -u origin main
 用 vocab-novel-studio 给我写一个定制小故事。
 先问我几个问题，再开始写。
 ```
+
+### 给外部用户：冷启动规则
+
+这个技能面向所有用户，不依赖作者的私人小说、词表或角色。测试全新用户体验时，最稳的是在一个**只包含本仓库的干净目录**里启动 agent；不要在主 Vault 中让 agent 读到无关的小说项目和旧稿。
+
+也可以在第一次消息里直接加上：
+
+```text
+请把我看成第一次使用这个 skill 的新用户。
+不要读取或引用当前工作区里与我的请求无关的小说、词表、角色或进度文件。
+先问我最多 3 个问题，再开始写。
+```
+
+对应的冷启动文件：`.claude/skills/vocab-novel-studio/prompts/00-start-here.md`。
 
 例如它可能会问：
 
@@ -263,6 +279,7 @@ vocab-novel-studio/
 │           │   ├── extract_words.py
 │           │   └── novel.py
 │           ├── prompts/
+│           │   ├── 00-start-here.md
 │           │   ├── 01-framework-bootstrap.md
 │           │   ├── 02-write-chapter.md
 │           │   ├── 03-audit-coverage.md
@@ -296,7 +313,7 @@ vocab-novel-studio/
 - **不编造词源、搭配和覆盖率。**
 - **人物要有独立目标；恋爱是关系的一种结果，不是奖励。**
 
-详细的操作规范与触发条件在 `.claude/skills/vocab-novel-studio/SKILL.md`。四个独立 prompt 在同目录的 `prompts/`，可用于不支持 skills 的其他 Agent。
+详细的操作规范与触发条件在 `.claude/skills/vocab-novel-studio/SKILL.md`。五个独立 prompt 在同目录的 `prompts/`，可用于不支持 skills 的其他 Agent。
 
 脚本命令在 skill 文件里使用 `<skill-dir>` 占位符：Claude Code 下是 `.claude/skills/vocab-novel-studio`，DSH 项目级安装下是 `.dsh/skills/vocab-novel-studio`。
 

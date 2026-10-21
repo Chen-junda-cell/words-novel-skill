@@ -1,7 +1,7 @@
 ---
 name: vocab-novel-studio
 description: Build, serialize, and audit vocabulary-learning novels or customized short stories from a user-supplied word list or theme. Use this skill whenever the user wants to scan vocabulary data, design a novel framework for word coverage, write the next chapter, generate a personalized short story after a short preference interview, or audit whether target words truly appear in story text. 当用户提到“扫描单词做小说”“词汇小说”“背单词小说”“建立小说总纲”“写下一章”“定制小故事”“短篇词汇故事”“词汇覆盖审计”等任务时，主动使用本 skill。
-version: 1.1.1
+version: 1.1.2
 ---
 
 # Vocab Novel Studio · 词汇小说工坊
@@ -21,6 +21,19 @@ The guiding rule:
 
 > **Plot is the memory carrier. The target meanings are the knowledge that must survive.**
 > Do not sacrifice story for coverage; do not silently drop or misuse words for plot.
+
+## Cold-start contract for public use
+
+This skill is designed for **new, external users**, not as a continuation of the author's private writing project.
+
+1. Do not assume the user's word count, ongoing novel, characters, fandom, language level or earlier drafts.
+2. If the workspace contains unrelated vocabulary files, novel drafts or project notes, ignore them unless the user explicitly names them or asks to continue that project.
+3. For a custom story, start from the user's own materials: their word list, a topic, a level, or a request for random selection.
+4. Never offer options such as “continue my old novel” or “reuse characters from another work” unless the user explicitly brings up that work.
+5. Treat “a fresh chat with no existing project” as the default. Existing project data is opt-in only.
+6. Do not mention or copy private workspace data into the skill, examples or public artifacts.
+
+If an agent finds private project files while using this public skill, it must not silently treat them as the user's current task.
 
 ## Standard project layout
 
@@ -245,6 +258,19 @@ Report scope, chapter/file evidence, actual forms, problems, repair suggestions,
 Use when the user wants a personalized short story instead of a full serialized novel chapter. This mode may be used without the three project ledgers.
 
 #### D1. Ask only a few questions
+
+For a first-time/external user, start with a neutral version like this (not with options derived from local files):
+
+```text
+我可以按你的口味写一篇独立短篇。
+先确认三件事：
+1. 你有自己的目标词表/主题吗？没有的话，我也可以按难度或主题帮你选词。
+2. 想要什么类型/氛围、长度，以及中文/双语/英文？
+3. 主角、视角、关系，以及有什么不想看的内容？
+```
+
+Do not open with a menu of existing projects, fixed word counts, character reuse, or any option derived from unrelated workspace files. A clean session starts from the user's own inputs.
+
 
 Ask at most **one short round** of 3–5 high-value questions, and never ask for information the user already provided. If an AskUserQuestion-style tool is available, use it; otherwise ask in plain text.
 

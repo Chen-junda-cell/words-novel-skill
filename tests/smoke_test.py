@@ -166,6 +166,7 @@ def main() -> int:
         assert csv_path.exists(), diag
 
         skill_dir = ROOT / ".claude" / "skills" / "vocab-novel-studio"
+        assert (skill_dir / "prompts" / "00-start-here.md").exists()
         assert (skill_dir / "prompts" / "04-custom-short-story.md").exists()
         assert (skill_dir / "templates" / "short_story_template.md").exists()
 
