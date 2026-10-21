@@ -11,11 +11,13 @@ import os
 import subprocess
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NOVEL = ROOT / ".claude" / "skills" / "vocab-novel-studio" / "scripts" / "novel.py"
 EXTRACT = ROOT / ".claude" / "skills" / "vocab-novel-studio" / "scripts" / "extract_words.py"
+PACKAGE = ROOT / ".claude" / "skills" / "vocab-novel-studio" / "scripts" / "package_story.py"
 
 
 def run(args: list[str], cwd: Path, expect: int | None = None) -> subprocess.CompletedProcess:
@@ -169,6 +171,27 @@ def main() -> int:
         assert (skill_dir / "prompts" / "00-start-here.md").exists()
         assert (skill_dir / "prompts" / "04-custom-short-story.md").exists()
         assert (skill_dir / "templates" / "short_story_template.md").exists()
+        assert (skill_dir / "templates" / "RESUME_CONTEXT.md").exists()
+        assert (skill_dir / "templates" / "CONTINUE_HERE.md").exists()
+
+        story_dir = root / "story-vault-source"
+        (story_dir / "data" / "raw").mkdir(parents=True)
+        (story_dir / "README.md").write_text("Test story", encoding="utf-8")
+        (story_dir / "RESUME_CONTEXT.md").write_text("Resume context", encoding="utf-8")
+        (story_dir / "CONTINUE_HERE.md").write_text("Continue here", encoding="utf-8")
+        (story_dir / ".env").write_text("SECRET=1", encoding="utf-8")
+        (story_dir / "data" / "raw" / "private.md").write_text("private", encoding="utf-8")
+        zip_path = root / "story-vault.zip"
+        package_proc = run([str(PACKAGE), "--source", str(story_dir), "--out", str(zip_path), "--name", "TestStoryVault"], root, expect=0)
+        package_data = json.loads(package_proc.stdout)
+        assert package_data["resume_context_included"] is True, package_data
+        with zipfile.ZipFile(zip_path) as zf:
+            names = set(zf.namelist())
+        assert "TestStoryVault/README.md" in names
+        assert "TestStoryVault/OPEN_IN_OBSIDIAN.md" in names
+        assert "TestStoryVault/RESUME_CONTEXT.md" in names
+        assert "TestStoryVault/.env" not in names
+        assert "TestStoryVault/data/raw/private.md" not in names
 
         print("SMOKE TEST PASSED")
         print(json.dumps({"next": next_data["title"], "audit": fixed_data["primary_coverage"], "extracted": 2}, ensure_ascii=False))

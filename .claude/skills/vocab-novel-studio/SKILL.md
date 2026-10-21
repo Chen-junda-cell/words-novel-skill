@@ -1,7 +1,7 @@
 ---
 name: vocab-novel-studio
-description: Build, serialize, and audit vocabulary-learning novels or customized short stories from a user-supplied word list or theme. Use this skill whenever the user wants to scan vocabulary data, design a novel framework for word coverage, write the next chapter, generate a personalized short story after a short preference interview, or audit whether target words truly appear in story text. 当用户提到“扫描单词做小说”“词汇小说”“背单词小说”“建立小说总纲”“写下一章”“定制小故事”“短篇词汇故事”“词汇覆盖审计”等任务时，主动使用本 skill。
-version: 1.1.2
+description: Build, serialize, audit, and package vocabulary-learning novels or customized short stories from a user-supplied word list or theme, including Obsidian-ready zip exports and new-chat resume state. Use this skill whenever the user wants to scan vocabulary data, design a novel framework for word coverage, write the next chapter, generate a personalized short story after a short preference interview, or audit whether target words truly appear in story text. 当用户提到“扫描单词做小说”“词汇小说”“背单词小说”“建立小说总纲”“写下一章”“定制小故事”“短篇词汇故事”“词汇覆盖审计”等任务时，主动使用本 skill。
+version: 1.2.0
 ---
 
 # Vocab Novel Studio · 词汇小说工坊
@@ -34,6 +34,15 @@ This skill is designed for **new, external users**, not as a continuation of the
 6. Do not mention or copy private workspace data into the skill, examples or public artifacts.
 
 If an agent finds private project files while using this public skill, it must not silently treat them as the user's current task.
+
+## Resume protocol for new chats
+
+A new conversation may have no memory of the previous one. Before asking setup questions, check for a handoff file or a portable story vault.
+
+- If the user provides `RESUME_CONTEXT.md`, `CONTINUE_HERE.md`, or an unzipped story vault, read it and continue from the recorded scene.
+- Do not restart the story, invent missing canon, or change character relationships.
+- If no handoff file exists and the user expects continuity, ask for one rather than guessing.
+- After every continuation, update `RESUME_CONTEXT.md` and `CONTINUE_HERE.md` so the next chat can resume.
 
 ## Standard project layout
 
@@ -340,6 +349,35 @@ Only if the user wants recurring stories:
 - read that ledger before the next story;
 - do not invent facts that contradict previous stories.
 
+#### D6. Portable Obsidian bundle
+
+When the user wants to read offline, move the story to Obsidian, or start a new chat later:
+
+1. Save the story as a project folder, for example:
+   ```text
+   stories/<slug>/
+   ├── README.md
+   ├── RESUME_CONTEXT.md
+   ├── CONTINUE_HERE.md
+   └── <story files>.md
+   ```
+2. Fill `RESUME_CONTEXT.md` and `CONTINUE_HERE.md` from the bundled templates.
+3. Run:
+   ```bash
+   python "<skill-dir>/scripts/package_story.py"      --source "stories/<slug>"      --out "exports/<slug>-obsidian.zip"
+   ```
+4. Tell the user:
+   - unzip the archive;
+   - open Obsidian → **Open folder as vault**;
+   - select the single top-level folder;
+   - start with `OPEN_IN_OBSIDIAN.md` and then the story.
+5. For a new DSH/chat session:
+   - attach or paste `RESUME_CONTEXT.md`;
+   - if the host cannot read a zip, unzip it first and attach the context plus the latest story file;
+   - say “continue from the last scene” rather than re-running the interview.
+
+If the host has no terminal or Python, still create the Markdown files and tell the user the archive step must be performed on a machine with file tools; do not claim a zip exists.
+
 ## Non-negotiable quality rules
 
 1. Target words must be accurate. A similar Chinese gloss does not prove two English words are interchangeable.
@@ -364,6 +402,12 @@ Parses HTML tables, Markdown tables or CSV/TSV word data and outputs a normalize
 - `next --novel-dir <project>` — read the ledger and latest chapter file; print next chapter title, target words, recurrence candidates and progress.
 - `audit --novel-dir <project> <chapter>` — preliminary form/coverage audit; excludes inset text and reports missing/inset-only/extra target words.
 
+### `package_story.py`
+
+- `--source <story-folder> --out <zip>` — create an Obsidian-ready zip with one top-level vault folder, `OPEN_IN_OBSIDIAN.md`, and a manifest.
+- Excludes `.git`, `.obsidian`, `.env`, caches and `data/raw/`.
+- Include `RESUME_CONTEXT.md` and `CONTINUE_HERE.md` before packaging; the script warns if the resume file is missing.
+
 The scripts use standard library only. Treat their output as a checklist, not as the final judge.
 
 ## Output to the user
@@ -383,6 +427,8 @@ For a custom short story:
 - target-word count actually used;
 - where it was saved (if anywhere);
 - any requested target words that were not used;
+- if requested or useful, the portable Obsidian zip path and how to open it;
+- for a new chat, the `RESUME_CONTEXT.md` file or its pasteable contents;
 - offer a continuation or a new story with the same cast.
 
 Do not paste the whole chapter into chat unless asked; the chapter file is the deliverable.
@@ -397,6 +443,8 @@ The user can say:
 - “把模拟阅读里的目标词也补进主线剧情。”
 - “给我写一个定制小故事，先问我几个问题。”
 - “随便来一个温柔的词汇短篇，12 个目标词。”
+- “把这篇故事打包成能直接用 Obsidian 打开的 zip。”
+- “根据 RESUME_CONTEXT.md 接着上次继续写。”
 
 If invoked without explicit paths, find the project ledgers first; if multiple projects exist, ask which one.
 

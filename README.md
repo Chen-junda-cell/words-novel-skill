@@ -10,7 +10,8 @@
 - 逐词覆盖审计；
 - 连续性与记忆进度台账；
 - “模拟阅读不能单独算覆盖”的硬规则；
-- 先询问偏好、再生成定制小故事的互动模式。
+- 先询问偏好、再生成定制小故事的互动模式；
+- 可打包成 Obsidian Vault 压缩包，并提供新对话续写上下文。
 
 > 仓库只提供工作流、脚本和模板。**不包含任何用户的小说正文、角色设定或受版权保护的原始词表。**
 
@@ -62,7 +63,21 @@ AI 写词汇小说时很容易出现三种失败：
 - 输出完整故事弧线，而不是词汇展示片段；
 - 目标词进入自然英文句子，篇末附轻量词汇回声与可选主动回忆。
 
-### 5. 用户附加硬规则
+### 5. Portable Vault：打包到 Obsidian
+
+- 把故事、人物/连续性文件、词汇回声打包成单个 zip；
+- 解压后得到一个顶层 Vault 文件夹，用 Obsidian 的 **Open folder as vault** 直接打开；
+- 同时生成 `RESUME_CONTEXT.md`，可粘贴或附加到新对话继续写；
+- 自动排除 `.env`、`.git`、`.obsidian`、缓存和 `data/raw/`。
+
+### 6. Resume：新对话继续写
+
+- 打包时同时生成 `RESUME_CONTEXT.md` 和 `CONTINUE_HERE.md`；
+- 新对话里附上/粘贴 `RESUME_CONTEXT.md`，agent 就能从上次停下的位置继续；
+- 不依赖上一段聊天记录，也不会擅自重新开始；
+- 如果没有终端或 Python，agent 应明确说明 zip 无法生成，而不是假装已经生成。
+
+### 7. 用户附加硬规则
 
 > 模拟阅读、试卷、信件、碑文或引文中的目标词，必须在同一章主线动作、对话或后果中再出现一次，才能算主覆盖。
 
@@ -187,6 +202,17 @@ git push -u origin main
 
 详细问答与生成规范见 `.claude/skills/vocab-novel-studio/prompts/04-custom-short-story.md`。
 
+### 新对话接着续写
+
+解压或打包后，在新对话里发：
+
+```text
+读取我附上的 RESUME_CONTEXT.md 和最新故事文件。
+从上次停下的位置继续，不要重新开始，也不要改掉已有人物关系。
+```
+
+如果 agent 不能直接读取 Markdown，就把 `RESUME_CONTEXT.md` 的内容直接粘贴进对话。
+
 ---
 
 ## 快速开始：建立长篇项目
@@ -290,6 +316,8 @@ vocab-novel-studio/
 │               ├── 02_progress_ledger.md
 │               ├── chapter_template.md
 │               ├── short_story_template.md
+│               ├── RESUME_CONTEXT.md
+│               ├── CONTINUE_HERE.md
 │               └── project_CLAUDE.md
 ├── tests/
 │   └── smoke_test.py
@@ -325,6 +353,8 @@ vocab-novel-studio/
 - `novel.py` 的覆盖审计只是词形初审；不规则词形、近义词、语义搭配仍需人工核验。
 - 脚本默认接受中文项目路径与中文文件名；其他语言项目需要调整模板/命名。
 - 不包含插图、排版引擎或 Anki 导出。
+- `package_story.py` 需要本地文件系统和 Python；纯聊天 host 只能生成 Markdown，不能真正生成 zip。
+- 新对话续写需要 `RESUME_CONTEXT.md`；没有它时，agent 不应假装记得上一段对话。
 
 ---
 

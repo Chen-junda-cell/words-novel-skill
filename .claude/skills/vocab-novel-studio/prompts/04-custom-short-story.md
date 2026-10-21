@@ -104,3 +104,15 @@
 - 报告目标词使用数量；
 - 如果有未使用的词，如实说明；
 - 可以询问是否沿用同一组人物再写一篇。
+
+## 打包与续写
+
+如果用户希望带到 Obsidian 或在新对话中继续：
+
+1. 创建故事文件夹，写入故事正文；
+2. 生成并填写 `RESUME_CONTEXT.md` 与 `CONTINUE_HERE.md`；
+3. 如果宿主有 Python/终端，运行 `package_story.py` 生成 Obsidian zip；
+4. 告诉用户解压后使用 **Open folder as vault**；
+5. 新对话读取 `RESUME_CONTEXT.md` 后继续，不要重新开始故事。
+
+如果宿主没有文件/终端能力，只能提供 Markdown 内容和续写上下文；不要声称已经生成 zip。
